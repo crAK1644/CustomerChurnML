@@ -1,0 +1,34 @@
+## Data Preprocessing Configuration
+
+# Feature definitions for the mall customers dataset
+features:
+  numeric:
+    - "Age"
+    - "Annual Income (k$)"
+    - "Spending Score (1-100)"
+    - "Estimated Savings (k$)"
+  
+  categorical:
+    - "Gender"
+    - "Age Group"
+    - "Preferred Category"
+
+# Target variable
+target: "Estimated Savings (k$)"
+
+# Preprocessing parameters
+preprocessing:
+  numeric:
+    imputation_strategy: "mean"
+    scaling: true
+  
+  categorical:
+    imputation_strategy: "most_frequent"
+    encoding: "onehot"
+    drop_first: true
+    handle_unknown: "ignore"
+
+# Data file paths
+data_paths:
+  raw_data: "/Users/ayberkkarataban/MallCustomersML/Mall_Customers_Enhanced 2.csv"
+  cleaned_data: "/Users/ayberkkarataban/MallCustomersML/Mall_Customers_Cleaned.csv"
