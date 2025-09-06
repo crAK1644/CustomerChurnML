@@ -1,0 +1,7 @@
+{
+    "python.testing.pytestArgs": [
+        "mall_customers_ml"
+    ],
+    "python.testing.unittestEnabled": false,
+    "python.testing.pytestEnabled": true
+}
