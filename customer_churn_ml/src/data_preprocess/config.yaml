@@ -1,0 +1,188 @@
+# Telco Customer Churn Configuration File
+# Configuration for data loading, preprocessing, and modeling
+
+# Data Configuration
+data:
+  # File paths
+  raw_data_path: "/Users/ayberkkarataban/MallCustomersML/Telco_Customer_Churn.csv"
+  processed_data_path: "/Users/ayberkkarataban/MallCustomersML/Telco_Customer_Churn_processed.csv"
+  
+  # Target variable
+  target_column: "Churn"
+  
+  # Data validation
+  expected_columns: 21  # Total expected columns in dataset
+
+# Feature Configuration
+features:
+  # Numerical features (continuous variables)
+  numerical:
+    - "tenure"
+    - "MonthlyCharges"
+    - "TotalCharges"
+    - "SeniorCitizen"
+  
+  # Categorical features
+  categorical:
+    - "gender"
+    - "Partner"
+    - "Dependents"
+    - "PhoneService"
+    - "MultipleLines"
+    - "InternetService"
+    - "OnlineSecurity"
+    - "OnlineBackup"
+    - "DeviceProtection"
+    - "TechSupport"
+    - "StreamingTV"
+    - "StreamingMovies"
+    - "Contract"
+    - "PaperlessBilling"
+    - "PaymentMethod"
+
+# Preprocessing Steps Configuration
+steps:
+  categorical:
+    imputer: SimpleImputer
+    imputer_kwargs:
+      strategy: most_frequent
+      fill_value: "unknown"
+    encoder: OneHotEncoder
+    encoder_kwargs:
+      handle_unknown: ignore
+      sparse_output: false
+  numerical:
+    imputer: SimpleImputer
+    imputer_kwargs:
+      strategy: median
+    scaler: StandardScaler
+    scaler_kwargs:
+      with_mean: true
+      with_std: true
+
+  # Features identified as strong predictors (from EDA)
+  strong_predictors:
+    categorical:
+      - "Contract"          # Chi² = 1184.60, p = 5.86e-258
+      - "InternetService"   # Chi² = 732.31, p = 9.57e-160
+      - "PaymentMethod"     # Chi² = 648.14, p = 3.68e-140
+    numerical:
+      - "tenure"            # p = 1.01e-77
+      - "MonthlyCharges"    # p = 1.10e-11
+      - "TotalCharges"      # p = 3.20e-07
+  
+  # Features identified as weak/noise (consider for removal)
+  weak_predictors:
+    - "gender"              # Chi² = 0.48, p = 0.487
+    - "Partner"             # p = 0.059 (Mann-Whitney U)
+    - "PhoneService"        # p = 0.064
+    - "PaperlessBilling"    # p = 0.078
+    - "StreamingTV"         # p = 0.319
+    - "StreamingMovies"     # p = 0.468
+
+# Data Preprocessing Configuration
+preprocessing:
+  # Value mappings for encoding
+  value_mappings:
+    binary_encoding:
+      "No": 0
+      "Yes": 1
+      "No internet service": 0
+      "No phone service": 0
+    
+  # Numerical feature preprocessing
+  numerical:
+    # Imputation strategy for missing values
+    imputation_strategy: "median"  # options: mean, median, mode, constant
+    
+    # Scaling method
+    scaling_method: "standard"     # options: standard, minmax, robust, none
+    
+    # Outlier handling
+    outlier_method: "iqr"         # options: iqr, zscore, none
+    outlier_threshold: 1.5        # IQR multiplier or Z-score threshold
+  
+  # Categorical feature preprocessing
+  categorical:
+    # Imputation strategy for missing values
+    imputation_strategy: "mode"   # options: mode, constant, drop
+    
+    # Encoding method
+    encoding_method: "onehot"     # options: onehot, label, target, binary
+    
+    # OneHot encoding parameters
+    drop_first: true              # Drop first category to avoid multicollinearity
+    handle_unknown: "ignore"      # How to handle unknown categories in test set
+    
+    # High cardinality threshold
+    max_categories: 10            # Maximum categories before considering other encoding methods
+
+# Model Configuration
+modeling:
+  # Train-test split
+  test_size: 0.2
+  random_state: 42
+  stratify: true                  # Stratify by target variable
+  
+  # Cross-validation
+  cv_folds: 5
+  cv_scoring: "roc_auc"          # Primary metric for model selection
+  
+  # Class balance handling
+  handle_imbalance: true
+  imbalance_method: "smote"      # options: smote, undersample, oversample, class_weight
+  
+  # Feature selection
+  feature_selection:
+    method: "statistical"        # options: statistical, model_based, univariate
+    k_best: 15                   # Number of top features to select
+    statistical_test: "chi2"     # For categorical features
+    
+# Evaluation Metrics
+evaluation:
+  primary_metric: "roc_auc"
+  secondary_metrics:
+    - "accuracy"
+    - "precision"
+    - "recall"
+    - "f1"
+    - "precision_recall_auc"
+  
+  # Threshold optimization
+  optimize_threshold: true
+  threshold_metric: "f1"         # Metric to optimize threshold for
+
+# Business Rules and Constraints
+business_rules:
+  # Churn rate expectations
+  expected_churn_rate:
+    min: 0.15                    # Minimum expected churn rate (15%)
+    max: 0.40                    # Maximum expected churn rate (40%)
+  
+  # Feature importance thresholds
+  feature_importance_threshold: 0.01  # Minimum importance to keep feature
+  
+  # Model performance thresholds
+  min_auc_score: 0.75            # Minimum acceptable AUC score
+  min_precision: 0.70            # Minimum acceptable precision
+  min_recall: 0.60               # Minimum acceptable recall
+
+# Logging and Monitoring
+logging:
+  level: "INFO"                  # options: DEBUG, INFO, WARNING, ERROR
+  log_file: "telco_churn_pipeline.log"
+  
+# Output Configuration
+output:
+  # Model artifacts
+  model_save_path: "models/"
+  model_name: "telco_churn_model"
+  
+  # Results and reports
+  results_path: "results/"
+  generate_report: true
+  report_format: ["html", "pdf"] # options: html, pdf, json
+  
+  # Feature importance plots
+  save_plots: true
+  plot_format: "png"             # options: png, svg, pdf
